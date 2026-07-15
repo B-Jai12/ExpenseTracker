@@ -185,7 +185,11 @@ export function DashboardLayout() {
   const handleLogout = () => { logout(); navigate('/login') }
 
   return (
-    <div className="min-h-screen bg-surface flex">
+    <div className="flex h-screen bg-surface overflow-hidden relative">
+      {/* Ambient background blobs for iOS glass refraction */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[40%] left-[30%] w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* ── Desktop Sidebar ── */}
       <aside

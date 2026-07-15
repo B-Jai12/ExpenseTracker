@@ -27,7 +27,7 @@ export function GlassCard({
   const glowClass = glowMap[glow] || ''
 
   const classes = cn(
-    'glass rounded-2xl border border-white/[0.06] shadow-card',
+    'glass rounded-3xl border border-white/[0.06] shadow-card',
     !noPad && 'p-5',
     hover && 'transition-all duration-300 cursor-pointer',
     hover && 'hover:bg-white/[0.045] hover:border-white/[0.10]',

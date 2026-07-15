@@ -37,7 +37,7 @@ export function Input({
         <input
           id={inputId}
           className={cn(
-            'w-full rounded-xl bg-white/[0.04] text-sm text-white placeholder-zinc-600',
+            'w-full rounded-2xl bg-white/[0.04] text-sm text-white placeholder-zinc-600',
             'border transition-all duration-200',
             'focus:outline-none',
             icon ? 'pl-9' : 'pl-3.5',

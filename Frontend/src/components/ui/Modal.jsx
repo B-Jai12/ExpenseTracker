@@ -60,7 +60,7 @@ export function Modal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
             aria-hidden="true"
           />
 
@@ -79,7 +79,7 @@ export function Modal({
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               className={cn(
                 'w-full flex flex-col',
-                'bg-[#131316] border border-white/[0.08] rounded-2xl shadow-elevated',
+                'glass rounded-3xl border border-white/[0.08] shadow-elevated',
                 'max-h-[90vh]',
                 sizeClasses[size]
               )}
