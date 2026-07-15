@@ -1,22 +1,93 @@
 import { useQuery } from '@tanstack/react-query'
 import { dashboardService } from '@/services/dashboardService'
 import { GlassCard } from '@/components/ui/GlassCard'
+import { StatCard } from '@/components/ui/StatCard'
 import { DashboardSkeleton } from '@/components/ui/Skeleton'
 import { CATEGORY_CONFIG } from '@/constants'
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, ArrowUpRight, ArrowDownLeft, HeartPulse, Brain, Quote } from 'lucide-react'
+import {
+  Wallet, TrendingUp, TrendingDown, PiggyBank,
+  HeartPulse, Brain, Quote, ArrowUpRight, ArrowDownLeft,
+  RefreshCw,
+} from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Cell, Pie,
 } from 'recharts'
-import CountUp from 'react-countup'
 import { motion } from 'framer-motion'
-import { formatDateShort, getRandomQuote, getHealthScore } from '@/utils'
+import { formatDateShort, getRandomQuote, getHealthScore, formatCurrency } from '@/utils'
+import { Button } from '@/components/ui/Button'
+import CountUp from 'react-countup'
 
-const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } }
-const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } } }
+/* ── Animation variants ───────────────────────────────────────── */
+const container = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { staggerChildren: 0.07 } },
+}
+const item = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } },
+}
 
+/* ── Custom chart tooltip ─────────────────────────────────────── */
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-[#131316] border border-white/10 rounded-xl px-3 py-2.5 shadow-elevated text-xs">
+      <p className="text-zinc-400 font-medium mb-1.5">{label}</p>
+      {payload.map(p => (
+        <div key={p.dataKey} className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }} />
+          <span className="text-zinc-400">{p.dataKey}</span>
+          <span className="ml-auto font-bold text-white pl-4">{formatCurrency(p.value)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ── Health gauge ─────────────────────────────────────────────── */
+function HealthGauge({ score }) {
+  const color = score >= 70 ? '#10B981' : score >= 45 ? '#F59E0B' : '#EF4444'
+  const r = 40
+  const circumference = 2 * Math.PI * r
+  const offset = circumference * (1 - score / 100)
+  const label = score >= 70 ? 'Excellent' : score >= 45 ? 'Fair' : 'Needs Work'
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative w-24 h-24">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r={r} className="fill-none stroke-white/5" strokeWidth="8" />
+          <motion.circle
+            cx="48" cy="48" r={r}
+            className="fill-none" stroke={color} strokeWidth="8" strokeLinecap="round"
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 1.4, ease: 'easeOut', delay: 0.3 }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold text-white font-display leading-none">
+            <CountUp end={score} duration={1.4} preserveValue />
+          </span>
+          <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">/ 100</span>
+        </div>
+      </div>
+      <div className="text-center">
+        <p className="text-xs font-bold text-white flex items-center gap-1 justify-center">
+          <HeartPulse className="w-3.5 h-3.5" style={{ color }} />
+          Financial Health
+        </p>
+        <p className="text-[10px] mt-0.5 font-semibold" style={{ color }}>{label}</p>
+      </div>
+    </div>
+  )
+}
+
+/* ── Main Dashboard ───────────────────────────────────────────── */
 export function Dashboard() {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['dashboard'],
     queryFn: dashboardService.getDashboard,
     staleTime: 30_000,
@@ -27,24 +98,34 @@ export function Dashboard() {
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center h-80 space-y-4">
-        <HeartPulse className="w-12 h-12 text-red-400/50" />
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+          <HeartPulse className="w-7 h-7 text-red-400" />
+        </div>
         <div className="text-center">
           <p className="text-white font-semibold">Failed to load dashboard</p>
-          <p className="text-xs text-zinc-400 mt-1">Could not reach the backend</p>
+          <p className="text-sm text-zinc-500 mt-1">Could not reach the backend server</p>
         </div>
-        <button onClick={() => refetch()}
-          className="px-5 py-2 rounded-xl glass border border-white/10 text-sm hover:bg-white/5 transition-colors">
+        <Button
+          onClick={() => refetch()}
+          variant="ghost"
+          size="sm"
+          leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+        >
           Try Again
-        </button>
+        </Button>
       </div>
     )
   }
 
-  const healthScore = getHealthScore(Number(data.monthlyIncome), Number(data.monthlyExpense), Number(data.currentBalance))
+  const healthScore = getHealthScore(
+    Number(data.monthlyIncome),
+    Number(data.monthlyExpense),
+    Number(data.currentBalance)
+  )
   const quote = getRandomQuote()
 
   const areaData = [...data.monthlySummaries].reverse().map(s => ({
-    name: s.monthName.slice(0, 3),
+    name: s.monthName?.slice(0, 3) || '',
     Income: Number(s.income),
     Expense: Number(s.expense),
   }))
@@ -56,75 +137,102 @@ export function Dashboard() {
     pct: Number(c.percentage),
   }))
 
+  const netPositive = Number(data.monthlyBalance) >= 0
+  const spendRatio = Number(data.monthlyIncome) > 0
+    ? Math.round((Number(data.monthlyExpense) / Number(data.monthlyIncome)) * 100)
+    : 0
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Net Balance',    value: data.currentBalance, icon: <Wallet className="w-4 h-4 text-blue-400" />,  iconBg: 'bg-blue-500/10',   glow: 'blue',  note: 'All-time' },
-          { label: 'Month Income',   value: data.monthlyIncome,  icon: <TrendingUp className="w-4 h-4 text-green-400" />, iconBg: 'bg-green-500/10', glow: 'green', note: 'This month' },
-          { label: 'Month Expense',  value: data.monthlyExpense, icon: <TrendingDown className="w-4 h-4 text-red-400" />, iconBg: 'bg-red-500/10',  glow: 'none',  note: 'This month' },
-          { label: 'Net Margin',     value: data.monthlyBalance, icon: <PiggyBank className="w-4 h-4 text-cyan-400" />, iconBg: 'bg-cyan-500/10',  glow: 'none',  note: 'Monthly surplus' },
-        ].map((card) => (
-          <motion.div key={card.label} variants={item}>
-            <GlassCard glow={card.glow} hover className="relative overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase">{card.label}</span>
-                <div className={`w-8 h-8 rounded-xl ${card.iconBg} flex items-center justify-center`}>{card.icon}</div>
-              </div>
-              <p className="text-2xl font-bold text-white font-display leading-none">
-                ₹<CountUp end={Number(card.value)} decimals={0} duration={1.4} separator="," />
-              </p>
-              <p className="text-[10px] text-zinc-500 mt-2">{card.note}</p>
-            </GlassCard>
-          </motion.div>
-        ))}
+        <motion.div variants={item}>
+          <StatCard
+            label="Net Balance"
+            value={data.currentBalance}
+            icon={<Wallet className="w-4 h-4 text-blue-400" />}
+            iconBg="bg-blue-500/10"
+            glow="blue"
+            note="All-time balance"
+          />
+        </motion.div>
+        <motion.div variants={item}>
+          <StatCard
+            label="Monthly Income"
+            value={data.monthlyIncome}
+            icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
+            iconBg="bg-emerald-500/10"
+            glow="green"
+            note="This month"
+          />
+        </motion.div>
+        <motion.div variants={item}>
+          <StatCard
+            label="Monthly Expenses"
+            value={data.monthlyExpense}
+            icon={<TrendingDown className="w-4 h-4 text-red-400" />}
+            iconBg="bg-red-500/10"
+            note={`${spendRatio}% of income`}
+          />
+        </motion.div>
+        <motion.div variants={item}>
+          <StatCard
+            label="Net Margin"
+            value={data.monthlyBalance}
+            icon={<PiggyBank className="w-4 h-4 text-cyan-400" />}
+            iconBg="bg-cyan-500/10"
+            glow={netPositive ? 'green' : 'none'}
+            note={netPositive ? '✓ Surplus this month' : '⚠ Deficit this month'}
+          />
+        </motion.div>
       </div>
 
-      {/* ── AI Insight + Quote ── */}
+      {/* ── Insights + Quote ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div variants={item} className="lg:col-span-2">
           <GlassCard className="h-full">
-            <div className="flex items-center gap-2 mb-5">
-              <Brain className="w-4 h-4 text-purple-400" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">AI Financial Insights</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Health Gauge */}
-              <div className="flex flex-col items-center">
-                <div className="relative w-24 h-24">
-                  <svg className="w-full h-full -rotate-90">
-                    <circle cx="48" cy="48" r="40" className="fill-none stroke-white/5" strokeWidth="8" />
-                    <circle cx="48" cy="48" r="40" className="fill-none stroke-blue-500 transition-all duration-1000"
-                      strokeWidth="8" strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 40}`}
-                      strokeDashoffset={`${2 * Math.PI * 40 * (1 - healthScore / 100)}`} />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white font-display">{healthScore}</span>
-                  </div>
-                </div>
-                <p className="text-xs font-semibold text-white mt-2 flex items-center gap-1">
-                  <HeartPulse className="w-3.5 h-3.5 text-blue-400" /> Financial Health
-                </p>
-                <p className="text-[10px] text-zinc-500 text-center">Score out of 100</p>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-purple-400" />
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                  AI Financial Insights
+                </h3>
               </div>
-              {/* Insights */}
+              {isFetching && (
+                <div className="flex items-center gap-1.5 text-[10px] text-zinc-600">
+                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  Updating…
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <HealthGauge score={healthScore} />
+
               <div className="md:col-span-2 space-y-3">
-                <div className="glass-light p-3.5 rounded-xl border border-white/5">
-                  <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1.5">Spending Alert</p>
+                <div className="glass-light p-3.5 rounded-xl border border-white/[0.06]">
+                  <p className="text-[9px] font-bold text-purple-400 uppercase tracking-widest mb-1.5">
+                    Spending Alert
+                  </p>
                   <p className="text-xs text-white/90 leading-relaxed">
-                    {Number(data.monthlyExpense) > Number(data.monthlyIncome) * 0.7
-                      ? '⚠️ Your outflows exceed 70% of income. Review non-essential budgets immediately.'
-                      : '✅ Spending is well-controlled at under 70% of income. You\'re in a healthy zone.'}
+                    {spendRatio > 90
+                      ? `🚨 Critical: ${spendRatio}% of income spent. Immediate action required.`
+                      : spendRatio > 70
+                      ? `⚠️ Caution: ${spendRatio}% of income spent. Review non-essentials.`
+                      : `✅ Healthy: Spending at ${spendRatio}% of income. Well within range.`}
                   </p>
                 </div>
-                <div className="glass-light p-3.5 rounded-xl border border-white/5">
-                  <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1.5">Smart Tip</p>
+                <div className="glass-light p-3.5 rounded-xl border border-white/[0.06]">
+                  <p className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest mb-1.5">
+                    Smart Recommendation
+                  </p>
                   <p className="text-xs text-white/90 leading-relaxed">
                     {Number(data.monthlyBalance) > 0
-                      ? `You have ₹${Number(data.monthlyBalance).toLocaleString()} surplus this month. Allocate 50% to savings goals.`
-                      : 'Expenses exceed income this month. Identify your top spending categories and set budget limits.'}
+                      ? `You have ${formatCurrency(data.monthlyBalance)} surplus this month. Allocate 50% to savings goals for optimal growth.`
+                      : Number(data.monthlyBalance) === 0
+                      ? 'Income exactly covers expenses. Try reducing one recurring expense this month.'
+                      : `Expenses exceed income by ${formatCurrency(Math.abs(Number(data.monthlyBalance)))}. Review your top spending categories immediately.`}
                   </p>
                 </div>
               </div>
@@ -135,14 +243,14 @@ export function Dashboard() {
         <motion.div variants={item}>
           <GlassCard className="h-full flex flex-col justify-between">
             <div className="flex items-center justify-between mb-4">
-              <Quote className="w-5 h-5 text-purple-400/60" />
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Daily Mindset</span>
+              <Quote className="w-5 h-5 text-purple-400/50" />
+              <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Daily Mindset</span>
             </div>
-            <p className="text-sm font-medium leading-relaxed text-white/90 italic font-display flex-1 flex items-center">
+            <p className="text-sm font-medium leading-relaxed text-white/85 italic font-display flex-1 flex items-center">
               "{quote}"
             </p>
-            <div className="border-t border-white/5 pt-3 mt-4 text-[10px] text-zinc-500">
-              Updated daily for financial clarity
+            <div className="border-t border-white/[0.05] pt-3 mt-4">
+              <p className="text-[10px] text-zinc-600">Rotates daily for financial clarity</p>
             </div>
           </GlassCard>
         </motion.div>
@@ -152,72 +260,110 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <motion.div variants={item} className="lg:col-span-2">
           <GlassCard>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-5">6-Month Overview</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-5">
+              6-Month Cash Flow
+            </h3>
             {areaData.length > 0 ? (
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={areaData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="gIncome" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
+                        <stop offset="5%"  stopColor="#10B981" stopOpacity={0.3} />
                         <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="gExpense" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EF4444" stopOpacity={0.25} />
+                        <stop offset="5%"  stopColor="#EF4444" stopOpacity={0.3} />
                         <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="name" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: '#111113', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px' }}
-                      formatter={(v) => [`₹${v.toLocaleString()}`, '']}
-                    />
-                    <Area type="monotone" dataKey="Income" stroke="#10B981" strokeWidth={2} fill="url(#gIncome)" dot={false} />
-                    <Area type="monotone" dataKey="Expense" stroke="#EF4444" strokeWidth={2} fill="url(#gExpense)" dot={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis dataKey="name" stroke="#3f3f46" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#3f3f46" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v => `₹${v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}`} />
+                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.06)', strokeWidth: 1 }} />
+                    <Area type="monotone" dataKey="Income"  stroke="#10B981" strokeWidth={2} fill="url(#gIncome)"  dot={false} activeDot={{ r: 4, strokeWidth: 0, fill: '#10B981' }} />
+                    <Area type="monotone" dataKey="Expense" stroke="#EF4444" strokeWidth={2} fill="url(#gExpense)" dot={false} activeDot={{ r: 4, strokeWidth: 0, fill: '#EF4444' }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-56 flex items-center justify-center">
-                <p className="text-xs text-zinc-500">No transaction history yet</p>
+              <div className="h-56 flex flex-col items-center justify-center text-center">
+                <p className="text-2xl mb-2">📊</p>
+                <p className="text-sm text-zinc-400 font-medium">No transaction history yet</p>
+                <p className="text-xs text-zinc-600 mt-1">Add transactions to see your cash flow chart</p>
               </div>
             )}
+
+            {/* Legend */}
+            <div className="flex items-center gap-5 mt-4 pt-3 border-t border-white/[0.04]">
+              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Income
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Expenses
+              </div>
+            </div>
           </GlassCard>
         </motion.div>
 
         <motion.div variants={item}>
           <GlassCard className="h-full">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-5">Spending by Category</h3>
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-4">
+              Spending by Category
+            </h3>
             {pieData.length > 0 ? (
               <>
                 <div className="h-40 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={62} paddingAngle={4} dataKey="value">
-                        {pieData.map((entry, i) => <Cell key={i} fill={entry.color} strokeWidth={0} />)}
+                      <Pie
+                        data={pieData}
+                        cx="50%" cy="50%"
+                        innerRadius={44} outerRadius={62}
+                        paddingAngle={3}
+                        dataKey="value"
+                        strokeWidth={0}
+                      >
+                        {pieData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} opacity={0.9} />
+                        ))}
                       </Pie>
                       <Tooltip
-                        contentStyle={{ background: '#111113', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px' }}
-                        formatter={(v) => [`₹${v.toLocaleString()}`, '']}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null
+                          const d = payload[0].payload
+                          return (
+                            <div className="bg-[#131316] border border-white/10 rounded-xl px-3 py-2 text-xs shadow-elevated">
+                              <p className="text-white font-bold">{d.name}</p>
+                              <p className="text-zinc-400">{formatCurrency(d.value)}</p>
+                              <p className="text-zinc-500">{d.pct.toFixed(1)}%</p>
+                            </div>
+                          )
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-2">
-                  {data.categoryWiseSpending.slice(0, 6).map(c => (
-                    <div key={c.category} className="flex items-center gap-1.5 text-[10px] min-w-0">
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CATEGORY_CONFIG[c.category]?.color || '#94A3B8' }} />
-                      <span className="text-zinc-500 truncate">{CATEGORY_CONFIG[c.category]?.label || c.category}</span>
-                      <span className="text-white font-semibold ml-auto">{Number(c.percentage).toFixed(0)}%</span>
+                <div className="space-y-1.5 mt-2">
+                  {data.categoryWiseSpending.slice(0, 5).map(c => (
+                    <div key={c.category} className="flex items-center gap-2 text-[11px] min-w-0">
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: CATEGORY_CONFIG[c.category]?.color || '#94A3B8' }}
+                      />
+                      <span className="text-zinc-500 truncate flex-1">
+                        {CATEGORY_CONFIG[c.category]?.emoji} {CATEGORY_CONFIG[c.category]?.label || c.category}
+                      </span>
+                      <span className="text-white font-semibold">{Number(c.percentage).toFixed(0)}%</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <div className="h-48 flex items-center justify-center">
-                <p className="text-xs text-zinc-500">No spending data yet</p>
+              <div className="h-48 flex flex-col items-center justify-center text-center">
+                <p className="text-2xl mb-2">🍩</p>
+                <p className="text-sm text-zinc-400 font-medium">No spending data</p>
+                <p className="text-xs text-zinc-600 mt-1">Add expense transactions to see breakdown</p>
               </div>
             )}
           </GlassCard>
@@ -228,45 +374,86 @@ export function Dashboard() {
       <motion.div variants={item}>
         <GlassCard>
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Recent Transactions</h3>
-            <span className="text-[10px] text-zinc-500">Last {data.recentTransactions.length} records</span>
+            <div>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                Recent Transactions
+              </h3>
+              {data.recentTransactions.length > 0 && (
+                <p className="text-[10px] text-zinc-600 mt-0.5">
+                  Last {data.recentTransactions.length} records
+                </p>
+              )}
+            </div>
           </div>
+
           {data.recentTransactions.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-white/5 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                    <th className="pb-3 pr-4">Description</th>
-                    <th className="pb-3 pr-4">Category</th>
-                    <th className="pb-3 pr-4">Date</th>
+                  <tr className="border-b border-white/[0.05] text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
+                    <th className="pb-3 pr-4">Transaction</th>
+                    <th className="pb-3 pr-4 hidden sm:table-cell">Category</th>
+                    <th className="pb-3 pr-4 hidden md:table-cell">Date</th>
                     <th className="pb-3 text-right">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                  {data.recentTransactions.map(tx => (
-                    <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="py-3 pr-4 text-sm text-white font-medium max-w-[160px] truncate">{tx.title}</td>
-                      <td className="py-3 pr-4">
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                          style={{ background: CATEGORY_CONFIG[tx.category]?.bg || 'rgba(255,255,255,0.05)', color: CATEGORY_CONFIG[tx.category]?.color || '#fff' }}>
-                          <span>{CATEGORY_CONFIG[tx.category]?.emoji}</span>
-                          <span>{CATEGORY_CONFIG[tx.category]?.label || tx.category}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4 text-[11px] text-zinc-500 whitespace-nowrap">{formatDateShort(tx.expenseDate)}</td>
-                      <td className={`py-3 text-right text-sm font-bold ${tx.transactionType === 'INCOME' ? 'text-green-400' : 'text-white'}`}>
-                        {tx.transactionType === 'INCOME' ? '+' : '-'}₹{Number(tx.amount).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-white/[0.03]">
+                  {data.recentTransactions.map(tx => {
+                    const isIncome = tx.transactionType === 'INCOME'
+                    const cfg = CATEGORY_CONFIG[tx.category]
+                    return (
+                      <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-3 pr-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-sm shrink-0"
+                              style={{ background: cfg?.bg || 'rgba(255,255,255,0.05)' }}
+                            >
+                              {isIncome
+                                ? <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+                                : (cfg?.emoji || <ArrowDownLeft className="w-3.5 h-3.5 text-zinc-400" />)
+                              }
+                            </div>
+                            <div>
+                              <p className="text-sm text-white font-medium leading-none max-w-[140px] truncate">
+                                {tx.title}
+                              </p>
+                              {tx.description && (
+                                <p className="text-[10px] text-zinc-600 mt-0.5 max-w-[140px] truncate">
+                                  {tx.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 pr-4 hidden sm:table-cell">
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                            style={{ background: cfg?.bg, color: cfg?.color }}
+                          >
+                            <span>{cfg?.emoji}</span>
+                            <span className="hidden lg:inline">{cfg?.label || tx.category}</span>
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 hidden md:table-cell text-[11px] text-zinc-500 whitespace-nowrap">
+                          {formatDateShort(tx.expenseDate)}
+                        </td>
+                        <td className={`py-3 text-right text-sm font-bold ${isIncome ? 'text-emerald-400' : 'text-white'}`}>
+                          {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-2xl mb-2">💸</p>
+              <p className="text-3xl mb-3">💸</p>
               <p className="text-sm text-white font-medium">No transactions yet</p>
-              <p className="text-xs text-zinc-500 mt-1">Add your first transaction in the Transactions tab</p>
+              <p className="text-xs text-zinc-500 mt-1">
+                Add your first transaction in the Transactions tab
+              </p>
             </div>
           )}
         </GlassCard>

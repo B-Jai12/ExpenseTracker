@@ -6,16 +6,24 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { RowSkeleton } from '@/components/ui/Skeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { Badge } from '@/components/ui/Badge'
 import { CATEGORY_CONFIG, CATEGORIES } from '@/constants'
-import { Plus, Search, Pencil, Trash2, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, ArrowUpRight, ArrowDownLeft, Filter, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
-import { formatDateShort } from '@/utils'
+import { formatDateShort, formatCurrency } from '@/utils'
+import CountUp from 'react-countup'
 
 const emptyForm = () => ({
   title: '', amount: '', category: 'OTHER', transactionType: 'EXPENSE',
   description: '', expenseDate: new Date().toISOString().split('T')[0],
 })
+
+/* Shared select class */
+const selectCls = 'w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-blue-500/40 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.10)] transition-all'
+const labelCls  = 'block text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5'
 
 export function Expenses() {
   const qc = useQueryClient()
@@ -26,16 +34,23 @@ export function Expenses() {
   const [saving, setSaving]   = useState(false)
   const [delId, setDelId]     = useState(null)
   const [search, setSearch]   = useState('')
-  const [typeFilter, setTypeFilter]     = useState('ALL')
-  const [catFilter, setCatFilter]       = useState('ALL')
+  const [typeFilter, setTypeFilter] = useState('ALL')
+  const [catFilter, setCatFilter]   = useState('ALL')
 
-  const { data: expenses = [], isLoading } = useQuery({ queryKey: ['expenses'], queryFn: expenseService.getAll, staleTime: 15_000 })
+  const { data: expenses = [], isLoading, error } = useQuery({
+    queryKey: ['expenses'],
+    queryFn: expenseService.getAll,
+    staleTime: 15_000,
+  })
 
-  const invalidate = () => { qc.invalidateQueries({ queryKey: ['expenses'] }); qc.invalidateQueries({ queryKey: ['dashboard'] }) }
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['expenses'] })
+    qc.invalidateQueries({ queryKey: ['dashboard'] })
+  }
 
-  const createMut = useMutation({ mutationFn: expenseService.create, onSuccess: () => { invalidate(); toast.success('Transaction added!'); close() }, onError: () => toast.error('Failed to add') })
+  const createMut = useMutation({ mutationFn: expenseService.create,       onSuccess: () => { invalidate(); toast.success('Transaction added!'); close() }, onError: () => toast.error('Failed to add') })
   const updateMut = useMutation({ mutationFn: ({ id, data }) => expenseService.update(id, data), onSuccess: () => { invalidate(); toast.success('Updated!'); close() }, onError: () => toast.error('Failed to update') })
-  const deleteMut = useMutation({ mutationFn: expenseService.delete, onSuccess: () => { invalidate(); toast.success('Deleted'); setDelId(null) }, onError: () => toast.error('Failed to delete') })
+  const deleteMut = useMutation({ mutationFn: expenseService.delete,       onSuccess: () => { invalidate(); toast.success('Deleted'); setDelId(null) }, onError: () => toast.error('Failed to delete') })
 
   const filtered = useMemo(() => expenses.filter(e => {
     const mT = typeFilter === 'ALL' || e.transactionType === typeFilter
@@ -46,10 +61,14 @@ export function Expenses() {
 
   const totalIncome  = useMemo(() => expenses.filter(e => e.transactionType === 'INCOME').reduce((s, e) => s + Number(e.amount), 0), [expenses])
   const totalExpense = useMemo(() => expenses.filter(e => e.transactionType === 'EXPENSE').reduce((s, e) => s + Number(e.amount), 0), [expenses])
+  const netBalance   = totalIncome - totalExpense
 
   const open = (exp = null) => {
     setEditing(exp)
-    setForm(exp ? { title: exp.title, amount: Number(exp.amount), category: exp.category, transactionType: exp.transactionType, description: exp.description || '', expenseDate: exp.expenseDate } : emptyForm())
+    setForm(exp
+      ? { title: exp.title, amount: Number(exp.amount), category: exp.category, transactionType: exp.transactionType, description: exp.description || '', expenseDate: exp.expenseDate }
+      : emptyForm()
+    )
     setErrs({})
     setModal(true)
   }
@@ -61,7 +80,8 @@ export function Expenses() {
     if (!form.title.trim()) e.title = 'Title is required'
     if (!form.amount || Number(form.amount) <= 0) e.amount = 'Amount must be > 0'
     if (!form.expenseDate) e.expenseDate = 'Date is required'
-    setErrs(e); return !Object.keys(e).length
+    setErrs(e)
+    return !Object.keys(e).length
   }
 
   const submit = async () => {
@@ -75,94 +95,209 @@ export function Expenses() {
   }
 
   return (
-    <div className="space-y-5">
-      {/* Summary */}
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      <PageHeader title="Transactions" subtitle={`${expenses.length} total records`}>
+        <Button onClick={() => open()} size="sm" leftIcon={<Plus className="w-3.5 h-3.5" />}>
+          Add Transaction
+        </Button>
+      </PageHeader>
+
+      {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
-        <GlassCard><p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Total Income</p><p className="text-xl font-bold text-green-400 font-display">₹{totalIncome.toLocaleString()}</p></GlassCard>
-        <GlassCard><p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Total Expenses</p><p className="text-xl font-bold text-red-400 font-display">₹{totalExpense.toLocaleString()}</p></GlassCard>
-        <GlassCard glow="blue"><p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Net Balance</p><p className={`text-xl font-bold font-display ${totalIncome - totalExpense >= 0 ? 'text-green-400' : 'text-red-400'}`}>₹{Math.abs(totalIncome - totalExpense).toLocaleString()}</p></GlassCard>
+        <GlassCard glow="green" hover>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Total Income</p>
+          <p className="text-xl font-bold text-emerald-400 font-display tabular-nums">
+            ₹<CountUp end={totalIncome} duration={1.0} separator="," preserveValue />
+          </p>
+        </GlassCard>
+        <GlassCard hover>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Total Expenses</p>
+          <p className="text-xl font-bold text-red-400 font-display tabular-nums">
+            ₹<CountUp end={totalExpense} duration={1.0} separator="," preserveValue />
+          </p>
+        </GlassCard>
+        <GlassCard glow={netBalance >= 0 ? 'blue' : 'none'} hover>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Net Balance</p>
+          <p className={`text-xl font-bold font-display tabular-nums ${netBalance >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+            {netBalance < 0 ? '-' : ''}₹<CountUp end={Math.abs(netBalance)} duration={1.0} separator="," preserveValue />
+          </p>
+        </GlassCard>
       </div>
 
       {/* Toolbar */}
       <GlassCard>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex-1 min-w-48 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-            <input className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/40"
-              placeholder="Search transactions..." value={search} onChange={e => setSearch(e.target.value)} />
+          {/* Search */}
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+            <input
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500/40 focus:bg-blue-500/[0.03] focus:shadow-[0_0_0_3px_rgba(59,130,246,0.10)] transition-all"
+              placeholder="Search transactions…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
-          <div className="flex items-center gap-1 p-1 glass-light rounded-xl border border-white/5">
+
+          {/* Type pills */}
+          <div className="flex items-center gap-0.5 p-1 glass-light rounded-xl border border-white/[0.06]">
             {['ALL', 'INCOME', 'EXPENSE'].map(f => (
-              <button key={f} onClick={() => setTypeFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${typeFilter === f ? 'bg-blue-500 text-white shadow-glow-blue' : 'text-zinc-400 hover:text-white'}`}>
+              <button
+                key={f}
+                onClick={() => setTypeFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  typeFilter === f
+                    ? f === 'INCOME'  ? 'bg-emerald-500/20 text-emerald-400'
+                    : f === 'EXPENSE' ? 'bg-red-500/20 text-red-400'
+                    : 'bg-blue-500/20 text-blue-400'
+                    : 'text-zinc-500 hover:text-zinc-200'
+                }`}
+              >
                 {f === 'ALL' ? 'All' : f === 'INCOME' ? '↑ Income' : '↓ Expense'}
               </button>
             ))}
           </div>
-          <select className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-zinc-400 focus:outline-none"
-            value={catFilter} onChange={e => setCatFilter(e.target.value)}>
+
+          {/* Category filter */}
+          <select
+            className="px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-400 focus:outline-none cursor-pointer"
+            value={catFilter}
+            onChange={e => setCatFilter(e.target.value)}
+          >
             <option value="ALL">All Categories</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_CONFIG[c].emoji} {CATEGORY_CONFIG[c].label}</option>)}
           </select>
-          <Button onClick={() => open()} size="sm"><Plus className="w-4 h-4 mr-1" />Add</Button>
         </div>
       </GlassCard>
 
       {/* Table */}
-      <GlassCard>
-        {isLoading ? <RowSkeleton count={6} /> : filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-2xl mb-3">💸</p>
-            <p className="text-sm text-white font-medium">{expenses.length === 0 ? 'No transactions yet' : 'No results match your filter'}</p>
-            {expenses.length === 0 && <Button onClick={() => open()} size="sm" className="mt-4"><Plus className="w-4 h-4 mr-1" />Add your first transaction</Button>}
-          </div>
+      <GlassCard noPad>
+        <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+            Showing {filtered.length} of {expenses.length}
+          </h3>
+          {(search || typeFilter !== 'ALL' || catFilter !== 'ALL') && (
+            <button
+              onClick={() => { setSearch(''); setTypeFilter('ALL'); setCatFilter('ALL') }}
+              className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+            >
+              <Filter className="w-3 h-3" /> Clear filters
+            </button>
+          )}
+        </div>
+
+        {error ? (
+          <EmptyState
+            icon={<AlertCircle className="w-7 h-7" />}
+            title="Failed to load transactions"
+            description="Could not reach the backend. Please check your connection."
+          />
+        ) : isLoading ? (
+          <div className="p-5"><RowSkeleton count={6} /></div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            emoji="💸"
+            title={expenses.length === 0 ? 'No transactions yet' : 'No results match your filters'}
+            description={
+              expenses.length === 0
+                ? 'Add your first income or expense to get started.'
+                : 'Try adjusting your search or filters to find what you\'re looking for.'
+            }
+            action={expenses.length === 0 ? () => open() : null}
+            actionLabel="Add first transaction"
+            actionIcon={<Plus className="w-3.5 h-3.5" />}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-white/5 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                  <th className="pb-3 pr-4">Transaction</th>
-                  <th className="pb-3 pr-4">Category</th>
-                  <th className="pb-3 pr-4">Type</th>
-                  <th className="pb-3 pr-4">Date</th>
-                  <th className="pb-3 pr-4 text-right">Amount</th>
-                  <th className="pb-3 text-right">Actions</th>
+                <tr className="border-b border-white/[0.04] text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
+                  <th className="px-5 py-3">Transaction</th>
+                  <th className="px-4 py-3 hidden sm:table-cell">Category</th>
+                  <th className="px-4 py-3 hidden md:table-cell">Type</th>
+                  <th className="px-4 py-3 hidden lg:table-cell">Date</th>
+                  <th className="px-4 py-3 text-right">Amount</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-white/[0.03]">
                 <AnimatePresence>
-                  {filtered.map(tx => (
-                    <motion.tr key={tx.id} layout initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}
-                      className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="py-3 pr-4">
-                        <p className="text-sm text-white font-medium max-w-[180px] truncate">{tx.title}</p>
-                        {tx.description && <p className="text-[10px] text-zinc-500 truncate max-w-[180px]">{tx.description}</p>}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                          style={{ background: CATEGORY_CONFIG[tx.category]?.bg, color: CATEGORY_CONFIG[tx.category]?.color }}>
-                          <span>{CATEGORY_CONFIG[tx.category]?.emoji}</span>
-                          <span>{CATEGORY_CONFIG[tx.category]?.label || tx.category}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold ${tx.transactionType === 'INCOME' ? 'text-green-400' : 'text-zinc-400'}`}>
-                          {tx.transactionType === 'INCOME' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownLeft className="w-3 h-3" />}
-                          {tx.transactionType}
-                        </span>
-                      </td>
-                      <td className="py-3 pr-4 text-[11px] text-zinc-500 whitespace-nowrap">{formatDateShort(tx.expenseDate)}</td>
-                      <td className={`py-3 pr-4 text-right text-sm font-bold ${tx.transactionType === 'INCOME' ? 'text-green-400' : 'text-white'}`}>
-                        {tx.transactionType === 'INCOME' ? '+' : '-'}₹{Number(tx.amount).toLocaleString()}
-                      </td>
-                      <td className="py-3 text-right">
-                        <div className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => open(tx)} className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-500 hover:text-white transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => setDelId(tx.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
+                  {filtered.map(tx => {
+                    const isIncome = tx.transactionType === 'INCOME'
+                    const cfg = CATEGORY_CONFIG[tx.category]
+                    return (
+                      <motion.tr
+                        key={tx.id}
+                        layout
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.15 }}
+                        className="hover:bg-white/[0.02] transition-colors group"
+                      >
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
+                              style={{ background: cfg?.bg || 'rgba(255,255,255,0.05)' }}
+                            >
+                              {isIncome
+                                ? <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+                                : (cfg?.emoji || <ArrowDownLeft className="w-3.5 h-3.5 text-zinc-400" />)
+                              }
+                            </div>
+                            <div>
+                              <p className="text-sm text-white font-medium leading-none truncate max-w-[140px] lg:max-w-[220px]">
+                                {tx.title}
+                              </p>
+                              {tx.description && (
+                                <p className="text-[10px] text-zinc-600 mt-0.5 truncate max-w-[140px]">
+                                  {tx.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5 hidden sm:table-cell">
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                            style={{ background: cfg?.bg, color: cfg?.color }}
+                          >
+                            <span>{cfg?.emoji}</span>
+                            <span className="hidden lg:inline">{cfg?.label || tx.category}</span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 hidden md:table-cell">
+                          <Badge variant={isIncome ? 'green' : 'default'} dot>
+                            {isIncome ? 'Income' : 'Expense'}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3.5 hidden lg:table-cell text-[11px] text-zinc-500 whitespace-nowrap">
+                          {formatDateShort(tx.expenseDate)}
+                        </td>
+                        <td className={`px-4 py-3.5 text-right text-sm font-bold tabular-nums ${isIncome ? 'text-emerald-400' : 'text-white'}`}>
+                          {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </td>
+                        <td className="px-4 py-3.5 text-right">
+                          <div className="inline-flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => open(tx)}
+                              className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-500 hover:text-white transition-colors"
+                              aria-label="Edit"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDelId(tx.id)}
+                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors"
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    )
+                  })}
                 </AnimatePresence>
               </tbody>
             </table>
@@ -179,43 +314,62 @@ export function Expenses() {
             <Input label="Date *" type="date" value={form.expenseDate} onChange={set('expenseDate')} error={errs.expenseDate} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-400">Category *</label>
-              <select className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-blue-500/40" value={form.category} onChange={set('category')}>
+            <div>
+              <label className={labelCls}>Category *</label>
+              <select className={selectCls} value={form.category} onChange={set('category')}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_CONFIG[c].emoji} {CATEGORY_CONFIG[c].label}</option>)}
               </select>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-400">Type *</label>
-              <select className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-blue-500/40" value={form.transactionType} onChange={set('transactionType')}>
+            <div>
+              <label className={labelCls}>Type *</label>
+              <select className={selectCls} value={form.transactionType} onChange={set('transactionType')}>
                 <option value="EXPENSE">↓ Expense</option>
                 <option value="INCOME">↑ Income</option>
               </select>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-zinc-400">Description (optional)</label>
-            <textarea rows={2} className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/40 resize-none"
-              placeholder="Additional details..." value={form.description} onChange={set('description')} />
+          <div>
+            <label className={labelCls}>Description (optional)</label>
+            <textarea
+              rows={2}
+              className={`${selectCls} resize-none`}
+              placeholder="Additional details…"
+              value={form.description}
+              onChange={set('description')}
+            />
           </div>
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" onClick={close} className="flex-1">Cancel</Button>
-            <Button onClick={submit} isLoading={saving} className="flex-1">{editing ? 'Save Changes' : 'Add Transaction'}</Button>
+            <Button onClick={submit} isLoading={saving} className="flex-1">
+              {editing ? 'Save Changes' : 'Add Transaction'}
+            </Button>
           </div>
         </div>
       </Modal>
 
-      {/* Delete Modal */}
-      <Modal isOpen={delId !== null} onClose={() => setDelId(null)} title="Delete Transaction">
+      {/* Delete Confirm */}
+      <Modal isOpen={delId !== null} onClose={() => setDelId(null)} title="Delete Transaction" size="sm">
         <div className="text-center space-y-4">
-          <p className="text-3xl">🗑️</p>
-          <p className="text-sm text-white/90">Delete this transaction? This cannot be undone.</p>
+          <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto">
+            <Trash2 className="w-6 h-6 text-red-400" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white">Delete this transaction?</p>
+            <p className="text-xs text-zinc-500 mt-1">This action cannot be undone.</p>
+          </div>
           <div className="flex gap-3">
             <Button variant="ghost" onClick={() => setDelId(null)} className="flex-1">Cancel</Button>
-            <Button onClick={() => delId && deleteMut.mutate(delId)} isLoading={deleteMut.isPending} className="flex-1 !bg-red-500/20 !border-red-500/30 !text-red-400">Delete</Button>
+            <Button
+              onClick={() => delId && deleteMut.mutate(delId)}
+              isLoading={deleteMut.isPending}
+              variant="danger"
+              className="flex-1"
+            >
+              Delete
+            </Button>
           </div>
         </div>
       </Modal>
-    </div>
+    </motion.div>
   )
 }

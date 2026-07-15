@@ -10,6 +10,7 @@ import { Budgets } from '@/pages/Budgets/Budgets'
 import { Bills } from '@/pages/Bills/Bills'
 import { Savings } from '@/pages/Savings/Savings'
 import { Profile } from '@/pages/Profile/Profile'
+import { NotFound } from '@/pages/NotFound/NotFound'
 
 export function AppRouter() {
   return (
@@ -36,8 +37,8 @@ export function AppRouter() {
         </Route>
       </Route>
 
-      {/* 404 fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
