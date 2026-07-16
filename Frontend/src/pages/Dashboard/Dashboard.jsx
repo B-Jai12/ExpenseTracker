@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect } from 'react'
 import { dashboardService } from '@/services/dashboardService'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { StatCard } from '@/components/ui/StatCard'
@@ -16,7 +17,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Cell, Pie,
 } from 'recharts'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { formatDateShort, getRandomQuote, getHealthScore, formatCurrency } from '@/utils'
 import { Button } from '@/components/ui/Button'
 import CountUp from 'react-countup'
@@ -132,7 +133,28 @@ export function Dashboard() {
     Number(data.monthlyExpense),
     Number(data.currentBalance)
   )
-  const quote = getRandomQuote()
+  // Auto-rotating quote — updates every 3 minutes with fade
+  const [quote, setQuote] = useState(getRandomQuote)
+  const [quoteVisible, setQuoteVisible] = useState(true)
+
+  useEffect(() => {
+    const THREE_MIN = 1000 * 60 * 3
+    // Calculate ms until the next 3-minute boundary
+    const msUntilNext = THREE_MIN - (Date.now() % THREE_MIN)
+    const tick = () => {
+      setQuoteVisible(false)
+      setTimeout(() => {
+        setQuote(getRandomQuote())
+        setQuoteVisible(true)
+      }, 500)
+    }
+    const initial = setTimeout(() => {
+      tick()
+      const interval = setInterval(tick, THREE_MIN)
+      return () => clearInterval(interval)
+    }, msUntilNext)
+    return () => clearTimeout(initial)
+  }, [])
 
   const areaData = [...data.monthlySummaries].reverse().map(s => ({
     name: s.monthName?.slice(0, 3) || '',
@@ -273,11 +295,30 @@ export function Dashboard() {
               <Quote className="w-5 h-5 text-purple-400/50" />
               <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Daily Mindset</span>
             </div>
-            <p className="text-sm font-medium leading-relaxed text-white/85 italic font-display flex-1 flex items-center">
-              "{quote}"
-            </p>
-            <div className="border-t border-white/[0.05] pt-3 mt-4">
-              <p className="text-[10px] text-zinc-600">Rotates daily for financial clarity</p>
+            <div className="flex-1 flex items-center min-h-[72px]">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={quote}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.5, ease: 'easeInOut' }}
+                  className="text-sm font-medium leading-relaxed text-white/85 italic font-display"
+                >
+                  &ldquo;{quote}&rdquo;
+                </motion.p>
+              </AnimatePresence>
+            </div>
+            <div className="border-t border-white/[0.05] pt-3 mt-4 flex items-center justify-between">
+              <p className="text-[10px] text-zinc-600">Rotates every 3 minutes</p>
+              <button
+                onClick={() => { setQuoteVisible(false); setTimeout(() => { setQuote(getRandomQuote()); setQuoteVisible(true) }, 400) }}
+                className="text-[10px] text-zinc-600 hover:text-purple-400 transition-colors flex items-center gap-1"
+                title="Next quote"
+              >
+                <RefreshCw className="w-3 h-3" />
+                next
+              </button>
             </div>
           </GlassCard>
         </motion.div>

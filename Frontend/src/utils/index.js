@@ -36,9 +36,10 @@ export function getGreeting() {
   return 'Good evening'
 }
 
-/** Deterministic daily quote (rotates each day) */
+/** Deterministic quote — rotates every 3 minutes */
 export function getRandomQuote() {
-  const idx = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % FINANCIAL_QUOTES.length
+  const THREE_MINUTES = 1000 * 60 * 3
+  const idx = Math.floor(Date.now() / THREE_MINUTES) % FINANCIAL_QUOTES.length
   return FINANCIAL_QUOTES[idx]
 }
 
