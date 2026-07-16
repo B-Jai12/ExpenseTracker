@@ -84,6 +84,10 @@ export function Budgets() {
     try {
       if (editing) await updateMut.mutateAsync({ id: editing.id, d: payload })
       else         await createMut.mutateAsync(payload)
+      
+      // Auto-switch the view to the month/year they just saved
+      setMonth(payload.budgetMonth)
+      setYear(payload.budgetYear)
     } finally { setSave(false) }
   }
 
