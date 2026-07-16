@@ -1,183 +1,146 @@
 <div align="center">
 
-<!-- Animated banner using capsule-render -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,25,30&height=200&section=header&text=FinFlow&fontSize=90&fontAlignY=38&desc=💸%20Your%20money.%20Your%20rules.%20Your%20clarity.&descAlignY=58&descAlign=50&animation=twinkling&fontColor=ffffff" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,25,30&height=220&section=header&text=FinFlow&fontSize=90&fontAlignY=40&desc=Your%20money.%20Your%20rules.%20Your%20clarity.&descAlignY=62&animation=fadeIn&fontColor=ffffff" width="100%"/>
 
 <br/>
 
-<!-- Typing animation -->
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&duration=3000&pause=1000&color=A78BFA&center=true&vCenter=true&multiline=true&repeat=true&width=600&height=80&lines=Full-Stack+Personal+Finance+Tracker;Built+with+React+%2B+Spring+Boot+%2B+PostgreSQL;Track+%7C+Budget+%7C+Save+%7C+Grow+💜" alt="Typing SVG" />
-
-<br/><br/>
-
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Aiven-336791?style=for-the-badge&logo=postgresql&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)
-![Render](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render&logoColor=black)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Aiven-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://aiven.io)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Vercel](https://img.shields.io/badge/Hosted_on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
+[![MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 <br/>
 
-> **FinFlow** is a full-stack personal finance tracker with a stunning glassmorphic dark UI,
-> real-time analytics, intelligent merchant detection, and rotating financial wisdom quotes —
-> all deployed on the cloud and ready to use from any device.
+> *A full-stack personal finance tracker — track spending, set budgets, grow savings, and visualize your financial health with a beautiful glassmorphic dark UI.*
 
 <br/>
 
-[![🚀 Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Click%20Here-A78BFA?style=for-the-badge)](https://expense-tracker-flax-ten-84.vercel.app)
-&nbsp;
-[![📖 API Docs](https://img.shields.io/badge/📡%20API%20Docs-Endpoints-6DB33F?style=for-the-badge)](#-api-endpoints)
-&nbsp;
-[![🛠️ Setup](https://img.shields.io/badge/🛠️%20Local%20Setup-Guide-61DAFB?style=for-the-badge)](#-local-development-setup)
-&nbsp;
-[![🐛 Bug Report](https://img.shields.io/badge/🐛%20Report%20Bug-Issues-EF4444?style=for-the-badge)](https://github.com/B-Jai12/ExpenseTracker/issues)
+**[🚀 Open Live App](https://expense-tracker-flax-ten-84.vercel.app) &nbsp;•&nbsp; [📡 API Docs](#-api-endpoints) &nbsp;•&nbsp; [💻 Run Locally](#-run-locally) &nbsp;•&nbsp; [🐛 Report Issue](https://github.com/B-Jai12/ExpenseTracker/issues)**
+
+<br/>
 
 </div>
 
 ---
 
-## ✨ Features at a Glance
+## 🌟 What can FinFlow do?
 
-| Feature | Description |
-|---|---|
-| 🏠 **Live Dashboard** | Real-time balance, income/expense stats, health score gauge, 6-month cash flow chart |
-| 💳 **Smart Transactions** | Add income & expenses with intelligent auto-categorization |
-| 🧠 **Merchant Detection** | Auto-identifies 100+ merchants (Swiggy, Amazon, Netflix, etc.) and assigns the right category |
-| 📊 **Reports & Analytics** | Pie charts, bar charts, category breakdowns, monthly trends |
-| 🎯 **Budget Tracking** | Set monthly budgets per category with visual progress bars and overspend alerts |
-| 💰 **Savings Goals** | Create savings targets and track your progress toward each goal |
-| 🔔 **Recurring Bills** | Track upcoming bills and subscriptions so you never miss a payment |
-| 💡 **Daily Mindset** | 60+ rotating financial wisdom quotes that change every 3 minutes with fade animation |
-| 🔒 **JWT Auth** | Secure stateless authentication — your data stays yours |
-| 📱 **Fully Responsive** | Works beautifully on mobile, tablet, and desktop |
+<table>
+<tr>
+<td width="50%">
+
+### 📊 Dashboard
+- Live balance, income & expense stats
+- Financial health score (0–100 gauge)
+- 6-month cash flow area chart
+- Category-wise spending pie chart
+- 60+ rotating wisdom quotes (every 3 min)
+
+### 💳 Transactions
+- Add income & expenses in seconds
+- 🧠 Intelligent merchant auto-detection
+- Auto-categorizes Swiggy, Amazon, Netflix & 100+ more
+- Filter by month, year, type, or category
+
+</td>
+<td width="50%">
+
+### 🎯 Budgets
+- Monthly budgets per spending category
+- Visual progress bars with % used
+- 🔴 Overspend alerts with exact amount
+- Auto-switches view to the newly saved budget
+
+### 💰 Savings & Bills
+- Create savings goals with target amounts
+- Track recurring bills & subscriptions
+- Never miss a payment again
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                        USER                             │
-└──────────────────────────┬──────────────────────────────┘
-                           │ opens browser
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│           🌐  VERCEL  (Frontend)                        │
-│         React 18 + Vite + TanStack Query                │
-│           Glassmorphic Dark UI | Framer Motion          │
-└──────────────────────────┬──────────────────────────────┘
-                           │ REST API calls
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│           ⚙️  RENDER  (Backend)                         │
-│         Spring Boot 3 + Java 17 + JWT Auth              │
-│           Docker containerized | REST API               │
-└──────────────────────────┬──────────────────────────────┘
-                           │ JPA / Hibernate
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│           🗄️  AIVEN  (Database)                         │
-│                PostgreSQL (Cloud)                       │
-│           Managed | Encrypted | Always-on               │
-└─────────────────────────────────────────────────────────┘
+         User
+          │
+          ▼
+  ┌───────────────────┐
+  │  Vercel (Frontend) │  React 18 + Vite + TanStack Query
+  │  Framer Motion     │  Glassmorphic Dark UI
+  └────────┬──────────┘
+           │  REST API (JWT Auth)
+           ▼
+  ┌───────────────────┐
+  │  Render (Backend)  │  Spring Boot 3 + Java 17
+  │  Docker Container  │  Spring Security + Hibernate
+  └────────┬──────────┘
+           │  JPA / Hibernate
+           ▼
+  ┌───────────────────┐
+  │  Aiven (Database)  │  PostgreSQL (Cloud)
+  │  Managed + SSL     │  Always-on, encrypted
+  └───────────────────┘
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-| Tech | Purpose |
+| Layer | Technology |
 |---|---|
-| **React 18** | UI framework |
-| **Vite 5** | Lightning-fast build tool |
-| **TanStack Query** | Server state, caching & sync |
-| **Framer Motion** | Smooth animations & transitions |
-| **Recharts** | Beautiful charts & graphs |
-| **Tailwind CSS** | Utility-first styling |
-| **Lucide React** | Icon library |
-| **Sonner** | Toast notifications |
-
-### Backend
-| Tech | Purpose |
-|---|---|
-| **Spring Boot 3** | REST API framework |
-| **Java 17** | Core language |
-| **Spring Security + JWT** | Authentication & authorization |
-| **Spring Data JPA** | Database ORM |
-| **Hibernate** | Object-relational mapping |
-| **Maven** | Dependency management |
-| **Docker** | Containerization |
-
-### Database & Infrastructure
-| Tech | Purpose |
-|---|---|
-| **PostgreSQL** | Primary database (via Aiven) |
-| **Aiven** | Managed cloud database |
-| **Render** | Backend hosting |
-| **Vercel** | Frontend hosting + CDN |
+| **Frontend** | React 18, Vite 5, TanStack Query, Framer Motion, Recharts, Tailwind CSS |
+| **Backend** | Spring Boot 3, Java 17, Spring Security, JWT, Spring Data JPA |
+| **Database** | PostgreSQL (Aiven cloud managed) |
+| **Hosting** | Vercel (frontend) + Render (backend) |
+| **Auth** | Stateless JWT — tokens never stored server-side |
 
 ---
 
 ## 🚀 Live Deployment
 
-| Service | URL |
-|---|---|
-| 🌐 **Frontend** | [expense-tracker-flax-ten-84.vercel.app](https://expense-tracker-flax-ten-84.vercel.app) |
-| ⚙️ **Backend API** | [expensetracker-vxzj.onrender.com/api](https://expensetracker-vxzj.onrender.com/api) |
-| 📡 **Health Check** | [expensetracker-vxzj.onrender.com/api/health](https://expensetracker-vxzj.onrender.com/api/health) |
+| | Service | Link |
+|---|---|---|
+| 🌐 | **Frontend** | [expense-tracker-flax-ten-84.vercel.app](https://expense-tracker-flax-ten-84.vercel.app) |
+| ⚙️ | **Backend API** | [expensetracker-vxzj.onrender.com/api](https://expensetracker-vxzj.onrender.com/api) |
+| 📡 | **Health Check** | [/api/health](https://expensetracker-vxzj.onrender.com/api/health) |
 
-> ⚠️ **Note:** The backend is on Render's free tier. The first request after 15 minutes of inactivity may take ~30 seconds to wake up. Subsequent requests are instant.
+> **⚠️ Free tier note:** Render spins down after 15 min inactivity. First request may take ~30s to wake up — totally normal for free hosting!
 
 ---
 
-## 💻 Local Development Setup
+## 💻 Run Locally
 
-### Prerequisites
+### Requirements
+- Java 17+ &nbsp;|&nbsp; Maven 3.8+ &nbsp;|&nbsp; Node 18+ &nbsp;|&nbsp; PostgreSQL 14+
 
-```bash
-java --version    # Java 17+
-mvn --version     # Apache Maven 3.8+
-node --version    # Node.js 18+
-psql --version    # PostgreSQL 14+
-```
-
-### 1️⃣ Clone the repository
+### Steps
 
 ```bash
+# 1. Clone
 git clone https://github.com/B-Jai12/ExpenseTracker.git
 cd ExpenseTracker
-```
 
-### 2️⃣ Set up the database
-
-```bash
-psql -U postgres -c "CREATE DATABASE expensetracker;"
-```
-
-### 3️⃣ Run the backend
-
-```bash
+# 2. Start backend (auto-creates all DB tables!)
 cd Backend
-# No .env needed for local dev — defaults are built in!
 mvn spring-boot:run
-```
-Backend starts on **http://localhost:8080** — Spring Boot auto-creates all tables ✅
+# → Running on http://localhost:8080
 
-### 4️⃣ Run the frontend
-
-```bash
+# 3. Start frontend (open a new terminal)
 cd Frontend
 npm install
 npm run dev
+# → Running on http://localhost:5173
 ```
-Frontend starts on **http://localhost:5173** ✅
 
-### 5️⃣ Open the app
+Open **http://localhost:5173** → Register → Done! 🎉
 
-Go to **http://localhost:5173** → Click **Register** → You're in! 🎉
+> No `.env` file needed for local dev — sensible defaults are built in.
 
 ---
 
@@ -185,132 +148,119 @@ Go to **http://localhost:5173** → Click **Register** → You're in! 🎉
 
 Base URL: `https://expensetracker-vxzj.onrender.com/api`
 
-### 🔐 Authentication
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/auth/register` | Register a new user |
-| `POST` | `/auth/login` | Login and get JWT token |
+<details>
+<summary><b>🔐 Auth</b></summary>
 
-### 💳 Expenses (requires JWT)
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/expenses` | Get all transactions |
-| `POST` | `/expenses` | Create a transaction |
-| `PUT` | `/expenses/{id}` | Update a transaction |
-| `DELETE` | `/expenses/{id}` | Delete a transaction |
-| `GET` | `/expenses/filter/period?month=7&year=2026` | Filter by month/year |
+| `POST` | `/auth/register` | Register new user |
+| `POST` | `/auth/login` | Login → returns JWT |
 
-### 🎯 Budgets (requires JWT)
+</details>
+
+<details>
+<summary><b>💳 Expenses (JWT required)</b></summary>
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/budgets` | Get all budgets |
-| `POST` | `/budgets` | Create a budget |
+| `GET` | `/expenses` | All transactions |
+| `POST` | `/expenses` | Create transaction |
+| `PUT` | `/expenses/{id}` | Update transaction |
+| `DELETE` | `/expenses/{id}` | Delete transaction |
+| `GET` | `/expenses/filter/period?month=7&year=2026` | Filter by period |
+
+</details>
+
+<details>
+<summary><b>🎯 Budgets (JWT required)</b></summary>
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/budgets` | All budgets |
+| `POST` | `/budgets` | Create budget |
 | `GET` | `/budgets/filter/period?month=7&year=2026` | Filter by period |
-| `PUT` | `/budgets/{id}` | Update a budget |
-| `DELETE` | `/budgets/{id}` | Delete a budget |
+| `PUT` | `/budgets/{id}` | Update budget |
+| `DELETE` | `/budgets/{id}` | Delete budget |
 
-### 🏠 Dashboard (requires JWT)
+</details>
+
+<details>
+<summary><b>🏠 Dashboard & More (JWT required)</b></summary>
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/dashboard` | Get full financial dashboard summary |
+| `GET` | `/dashboard` | Full financial summary |
+| `GET` | `/savings-goals` | All savings goals |
+| `POST` | `/savings-goals` | Create savings goal |
+| `GET` | `/bills` | All recurring bills |
+| `POST` | `/bills` | Create bill |
 
-### 💰 Savings Goals (requires JWT)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/savings-goals` | Get all savings goals |
-| `POST` | `/savings-goals` | Create a savings goal |
-| `PUT` | `/savings-goals/{id}` | Update a savings goal |
+</details>
 
-> 💡 All protected endpoints require: `Authorization: Bearer <your_jwt_token>`
+> All protected endpoints require: `Authorization: Bearer <token>`
 
 ---
 
-## 📁 Project Structure
+## 📁 Structure
 
 ```
 ExpenseTracker/
+├── Frontend/              ← React + Vite app
+│   └── src/
+│       ├── components/   ← Reusable UI (GlassCard, Button, Modal...)
+│       ├── pages/        ← Dashboard, Expenses, Budgets, Savings, Bills, Reports
+│       ├── services/     ← API layer + merchant intelligence
+│       ├── constants/    ← Categories, months, 60 financial quotes
+│       └── utils/        ← Helpers, formatters, health score
 │
-├── 📂 Frontend/                    # React + Vite app
-│   ├── src/
-│   │   ├── components/            # Reusable UI components
-│   │   │   └── ui/               # GlassCard, Button, Modal, etc.
-│   │   ├── pages/                 # Page components
-│   │   │   ├── Dashboard/        # Main dashboard
-│   │   │   ├── Expenses/         # Transactions
-│   │   │   ├── Budgets/          # Budget tracking
-│   │   │   ├── Savings/          # Savings goals
-│   │   │   ├── Bills/            # Recurring bills
-│   │   │   └── Reports/          # Analytics
-│   │   ├── services/             # API service layer
-│   │   │   ├── api.js            # Axios instance + interceptors
-│   │   │   └── merchantService.js # Intelligent category detection
-│   │   ├── constants/            # App-wide constants & 60 quotes
-│   │   └── utils/                # Helper utilities
-│   └── Dockerfile
-│
-├── 📂 Backend/                     # Spring Boot app
-│   └── src/main/java/com/expensetracker/
-│       ├── controller/           # REST controllers
-│       ├── service/              # Business logic
-│       ├── repository/           # JPA repositories
-│       ├── entity/               # JPA entities
-│       ├── dto/                  # Request/Response DTOs
-│       ├── mapper/               # Entity ↔ DTO mappers
-│       ├── security/             # JWT auth configuration
-│       └── exception/            # Global error handling
-│
-└── 📄 README.md
+└── Backend/               ← Spring Boot app
+    └── src/main/java/com/expensetracker/
+        ├── controller/   ← REST endpoints
+        ├── service/      ← Business logic
+        ├── repository/   ← JPA queries
+        ├── entity/       ← DB models
+        ├── security/     ← JWT config
+        └── dto/          ← Request/Response objects
 ```
 
 ---
 
 ## 🔐 Environment Variables
 
-### Backend (Render dashboard)
-| Variable | Example |
-|---|---|
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://host:port/db?sslmode=require` |
-| `SPRING_DATASOURCE_USERNAME` | `avnadmin` |
-| `SPRING_DATASOURCE_PASSWORD` | `your_password` |
-| `JWT_SECRET` | `your_256bit_secret` |
+**Backend** (Render → Environment)
 
-### Frontend (Vercel dashboard)
-| Variable | Example |
-|---|---|
-| `VITE_API_BASE_URL` | `https://your-backend.onrender.com/api` |
+```env
+SPRING_DATASOURCE_URL=jdbc:postgresql://host:port/db?sslmode=require
+SPRING_DATASOURCE_USERNAME=your_user
+SPRING_DATASOURCE_PASSWORD=your_password
+JWT_SECRET=your_256bit_secret_key
+```
+
+**Frontend** (Vercel → Settings → Environment Variables)
+
+```env
+VITE_API_BASE_URL=https://your-backend.onrender.com/api
+```
 
 ---
 
 ## 🤝 Contributing
 
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch: `git checkout -b feat/amazing-feature`
-3. 💾 Commit your changes: `git commit -m 'feat: add amazing feature'`
-4. 📤 Push to branch: `git push origin feat/amazing-feature`
-5. 🔃 Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.
-
----
-
-## 👨‍💻 Author
-
-**Jaideep**
-
-[![GitHub](https://img.shields.io/badge/GitHub-B--Jai12-181717?style=for-the-badge&logo=github)](https://github.com/B-Jai12)
+```bash
+git checkout -b feat/your-feature
+git commit -m "feat: describe your change"
+git push origin feat/your-feature
+# → Open a Pull Request
+```
 
 ---
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,25,30&height=100&section=footer&animation=twinkling" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,25,30&height=100&section=footer&animation=fadeIn" width="100%"/>
 
-**Built with ❤️, ☕, and a lot of debugging**
+Made by **[Jaideep](https://github.com/B-Jai12)** &nbsp;•&nbsp; Give it a ⭐ if you like it!
 
-*If this helped you, please give it a ⭐ on GitHub!*
+[![GitHub](https://img.shields.io/badge/GitHub-B--Jai12-181717?style=for-the-badge&logo=github)](https://github.com/B-Jai12)
 
 </div>
