@@ -6,7 +6,7 @@
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Aiven-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://aiven.io)
+[![MySQL](https://img.shields.io/badge/MySQL-Aiven-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://aiven.io)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Vercel](https://img.shields.io/badge/Hosted_on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
 [![MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
@@ -83,7 +83,7 @@
            │  JPA / Hibernate
            ▼
   ┌───────────────────┐
-  │  Aiven (Database)  │  PostgreSQL (Cloud)
+  │  Aiven (Database)  │  MySQL (Cloud)
   │  Managed + SSL     │  Always-on, encrypted
   └───────────────────┘
 ```
@@ -96,7 +96,7 @@
 |---|---|
 | **Frontend** | React 18, Vite 5, TanStack Query, Framer Motion, Recharts, Tailwind CSS |
 | **Backend** | Spring Boot 3, Java 17, Spring Security, JWT, Spring Data JPA |
-| **Database** | PostgreSQL (Aiven cloud managed) |
+| **Database** | MySQL (Aiven cloud managed) |
 | **Hosting** | Vercel (frontend) + Render (backend) |
 | **Auth** | Stateless JWT — tokens never stored server-side |
 
@@ -117,7 +117,7 @@
 ## 💻 Run Locally
 
 ### Requirements
-- Java 17+ &nbsp;|&nbsp; Maven 3.8+ &nbsp;|&nbsp; Node 18+ &nbsp;|&nbsp; PostgreSQL 14+
+- Java 17+ &nbsp;|&nbsp; Maven 3.8+ &nbsp;|&nbsp; Node 18+ &nbsp;|&nbsp; MySQL 8.0+
 
 ### Steps
 
@@ -230,7 +230,7 @@ ExpenseTracker/
 **Backend** (Render → Environment)
 
 ```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://host:port/db?sslmode=require
+SPRING_DATASOURCE_URL=jdbc:mysql://host:port/db?useSSL=true&serverTimezone=UTC
 SPRING_DATASOURCE_USERNAME=your_user
 SPRING_DATASOURCE_PASSWORD=your_password
 JWT_SECRET=your_256bit_secret_key
